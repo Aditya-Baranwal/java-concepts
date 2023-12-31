@@ -2,8 +2,8 @@ package com.java.threading.odd_even_printer;
 
 class Counter {
 
-    private int counter = 0;
-    private int MAX_VALUE;
+    private volatile int counter = 0;
+    private volatile int MAX_VALUE;
 
     public Counter(int maxValue) {
         MAX_VALUE = maxValue;
