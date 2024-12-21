@@ -1,4 +1,4 @@
-package com.java.threading.odd_even_printer;
+package com.java.threading.odd_even_printer_using_synchronized;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String args[]) {
 
-        // cresting a counter
+        // creating a counter
         Counter counter = new Counter(100);
         // creating a thread which will print odd number.
         OddPrinter oddPrinter = new OddPrinter(counter);

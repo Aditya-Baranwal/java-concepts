@@ -734,6 +734,609 @@ public class Problems {
         return searchForMinimum(num, left, mid-1);
     }
 
+    public static int findPeakElement(int[] nums) {
+        int startIdx = 0;
+        int endIdx = nums.length-1;
+        while (true) {
+            int mid = startIdx + (endIdx-startIdx)/2;
+            if(mid == 0) {
+                if(nums[mid+1] > nums[mid]) {
+                    startIdx = mid+1;
+                    continue;
+                }
+                return mid;
+            }
+
+            if(mid == nums.length-1) {
+                if(nums[mid-1] > nums[mid]) {
+                    endIdx = mid-1;
+                    continue;
+                }
+                return mid;
+            }
+            if(nums[mid] > nums[mid-1] && nums[mid] > nums[mid+1]) return mid;
+            if(nums[mid] < nums[mid-1] && nums[mid] > nums[mid+1]) {
+                endIdx = mid-1;
+                continue;
+            }
+            if(nums[mid] > nums[mid-1] && nums[mid] < nums[mid+1]) {
+                startIdx = mid+1;
+                continue;
+            }
+            endIdx = mid-1;
+        }
+
+    }
+
+    public static String addBinary(String a, String b) {
+        int i = a.length()-1, j = b.length()-1, carry = 0;
+        StringBuilder result = new StringBuilder();
+
+        while(i>-1 && j>-1) {
+            int a1 = Integer.parseInt(""+a.charAt(i));
+            int a2 = Integer.parseInt(""+b.charAt(j));
+            int sum = a1^a2^carry;
+            carry = a1&a2 | (a1^a2)&carry;
+            result.append((Integer.toString(sum)).charAt(0));
+            --i;
+            --j;
+        }
+
+        while(i>-1) {
+            int a1 = Integer.parseInt(""+a.charAt(i));
+            int sum = a1^carry;
+            carry = a1&carry;
+            result.append((Integer.toString(sum)).charAt(0));
+            --i;
+        }
+
+        while(j>-1) {
+            int a1 = Integer.parseInt(""+b.charAt(j));
+            int sum = a1^carry;
+            carry = a1&carry;
+            result.append((Integer.toString(sum)).charAt(0));
+            --j;
+        }
+
+        if(carry == 1) result.append('1');
+
+        return result.reverse().toString();
+    }
+
+    public static int reverseBits(int n) {
+        StringBuilder reverseBits = new StringBuilder();
+        while (reverseBits.length() < 32) {
+            int mod = n%2;
+            n = n/2;
+            reverseBits.append(mod == 1 ? '1' : '0');
+        }
+        System.out.println(reverseBits);
+        return Integer.parseInt(reverseBits.toString(), 2);
+    }
+
+    public static List<String> summaryRanges(int[] nums) {
+        List<String> result = new ArrayList<>();
+        if(nums.length == 0) return result;
+        int start = 0;
+        int end = 0;
+        for(int i=1; i<nums.length; i++) {
+            if(nums[i]-nums[i-1] == 1){
+                ++end;
+            } else {
+                if(start == end) {
+                    result.add(Integer.toString(nums[start]));
+                } else {
+                    result.add(String.format("%d->%d", start, end));
+                }
+                start = i;
+                end = i;
+            }
+        }
+        if(start == end) {
+            result.add(Integer.toString(nums[start]));
+        } else {
+            result.add(String.format("%d->%d", start, end));
+        }
+        return result;
+    }
+
+    public static int[][] merge(int[][] intervals) {
+        /**
+         * time complexity nlog(n) --> since sorting
+         * space complexity o(n)
+         */
+        Arrays.sort(intervals, (t1, t2) -> Integer.compare(t1[0], t2[0]));
+        List<int[]> result = new ArrayList<>();
+        int startPoint = 0, endPoint = 0;
+        for(int i=0; i<intervals.length; i++) {
+            if(i==0) {
+                startPoint = intervals[i][0];
+                endPoint = intervals[i][1];
+            } else {
+                if(intervals[i][0] < endPoint) {
+                    endPoint = Math.max(intervals[i][1],endPoint);
+                } else {
+                    result.add(new int[]{startPoint, endPoint});
+                    startPoint = intervals[i][0];
+                    endPoint = intervals[i][1];
+                }
+            }
+        }
+        result.add(new int[]{startPoint, endPoint});
+        return result.toArray(new int[0][0]);
+    }
+
+    public static int[][] insert(int[][] intervals, int[] newInterval) {
+        ArrayList<int[]> result = new ArrayList<>();
+        for(int i=0; i<intervals.length; i++) {
+            if(newInterval[0] > intervals[i][1]) {
+                result.add(intervals[i]);
+            }  else if(newInterval[1] < intervals[i][0]) {
+                result.add(newInterval);
+                newInterval = new int[]{intervals[i][0], intervals[i][1]};
+            } else {
+                newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
+                newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
+            }
+        }
+        result.add(newInterval);
+        return result.toArray(new int[0][0]);
+    }
+
+    public static int findMinArrowShots(int[][] points) {
+        Arrays.sort(points, (int[] e1, int[] e2) -> {
+            if(e1[0] == e2[0]) {
+                return Integer.compare(e1[1], e2[1]);
+            }
+            return Integer.compare(e1[0], e2[0]);
+        });
+        int throwsRequired = 0;
+        int[] baseBalloon = null;
+        int maxBound = -1;
+        for(int i=0; i<points.length; i++) {
+            if(baseBalloon == null) {
+                baseBalloon = points[i];
+                maxBound = points[i][1];
+                ++throwsRequired;
+                continue;
+            }
+
+            if(points[i][0] <= baseBalloon[1] && points[i][0] <= maxBound) {
+                maxBound = Math.min(maxBound, points[i][1]);
+                points[i] = null;
+            } else {
+                baseBalloon = points[i];
+                maxBound = points[i][1];
+                ++throwsRequired;
+            }
+        }
+        return throwsRequired;
+    }
+
+    public static List<Integer> spiralOrder(int[][] matrix) {
+
+        List<Integer> result = new ArrayList<>();
+
+        int left = 0, right = matrix[0].length;
+        int top = 0, bottom = matrix.length;
+
+        while(left < right && top < bottom) {
+
+            for(int i=left; i<right; i++) {
+               result.add(matrix[top][i]);
+            }
+            ++top;
+
+            for(int i=top; i<bottom; i++) {
+                result.add(matrix[i][right-1]);
+            }
+            --right;
+
+            if(top < bottom) {
+                for(int i=right-1; i>=left; i--) {
+                    result.add(matrix[bottom-1][i]);
+                }
+            }
+            --bottom;
+
+            if(left < right) {
+                for(int i=bottom-1; i>=top; i--) {
+                    result.add(matrix[i][left]);
+                }
+            }
+            ++left;
+        }
+
+        return result;
+
+    }
+
+    public static void setZeroes(int[][] matrix) {
+
+        boolean firstRowContainsZero = false;
+        boolean firstColumnContainsZero = false;
+
+        for(int i=0; i<matrix.length; i++) {
+            for(int j=0; j<matrix[0].length; j++) {
+                if(matrix[i][j] == 0) {
+                    if(i == 0 && j == 0) {
+                        firstRowContainsZero = true;
+                        firstColumnContainsZero = true;
+                    }
+
+                    if(i == 0) {
+                        firstRowContainsZero = true;
+                    }
+
+                    if(j == 0) {
+                        firstColumnContainsZero = true;
+                    }
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+
+        for(int i=matrix[0].length-1; i>0; i--) {
+            if(matrix[0][i] == 0) {
+                for(int j=matrix.length-1; j>0; j--) {
+                    matrix[j][i] = 0;
+                }
+            }
+        }
+
+        for(int i=matrix.length-1; i>0; i--) {
+            if(matrix[i][0] == 0) {
+                for(int j=matrix[0].length-1; j>0; j--) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+
+        if(firstRowContainsZero) {
+            for(int i=1; i<matrix[0].length; i++) {
+                matrix[0][i] = 0;
+            }
+        }
+
+        if(firstColumnContainsZero) {
+            for(int i=1; i<matrix.length; i++) {
+                matrix[i][0] = 0;
+            }
+        }
+
+    }
+
+    public static void gameOfLife(int[][] board) {
+        int[][] boardStore = new int[board.length+2][board[0].length+2];
+
+        for(int i=0; i<board.length; i++) {
+            for(int j=0; j<board[0].length; j++) {
+                boardStore[i+1][j+1] = board[i][j];
+            }
+        }
+
+        for(int i=0; i<board.length; i++) {
+            for(int j=0; j<board[0].length; j++) {
+                int count = countNumberOfOne(boardStore, i+1, j+1);
+                if(boardStore[i+1][j+1] == 1) {
+                    if(count < 2 || count > 3) board[i][j] = 0;
+                }
+                if(boardStore[i+1][j+1] == 0 && count == 3) board[i][j] = 1;
+            }
+        }
+
+    }
+
+    public static int countNumberOfOne(int[][] matrix, int i, int j) {
+        int count = 0;
+
+        if(matrix[i][j-1] == 1) ++count;
+        if(matrix[i+1][j-1] == 1) ++count;
+        if(matrix[i-1][j-1] == 1) ++count;
+
+        if(matrix[i+1][j] == 1) ++count;
+        if(matrix[i-1][j] == 1) ++count;
+
+        if(matrix[i][j+1] == 1) ++count;
+        if(matrix[i+1][j+1] == 1) ++count;
+        if(matrix[i-1][j+1] == 1) ++count;
+
+        return count;
+    }
+
+    public static void rotate(int[][] matrix){
+        for(int i=0; i<matrix.length; i++) {
+            for(int j=i; j<matrix[0].length; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+
+        int m = 0, n = matrix.length-1;
+        while(m < n) {
+            for(int i=0; i<matrix.length; i++) {
+                int temp = matrix[i][m];
+                matrix[i][m] = matrix[i][n];
+                matrix[i][n] = temp;
+            }
+            ++m;
+            --n;
+        }
+
+    }
+
+    public static boolean isValidSudoku(char[][] board) {
+
+        int[] trackingArray;
+
+//        check column
+        for(int i=0; i<board.length; i++) {
+            trackingArray = new int[9];
+            for (int j = 0; j < board[0].length; j++) {
+                if(!validateElement(board[j][i], trackingArray)){
+                    return false;
+                }
+            }
+        }
+
+        // check row
+        for(int i=0; i<board.length; i++) {
+            trackingArray = new int[9];
+            for (int j = 0; j < board[0].length; j++) {
+                if(!validateElement(board[i][j], trackingArray)){
+                    return false;
+                }
+            }
+        }
+
+        // check blocks
+        for(int m=1; m<4; m++) {
+            for(int n=1; n<4; n++) {
+                trackingArray = new int[9];
+                for(int i=1; i<4; i++) {
+                    for(int j=1; j<4; j++) {
+                        if(!validateElement(board[3*(m-1)+(i-1)][3*(n-1)+(j-1)], trackingArray)){
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    static boolean validateElement(char currentCharacter, int[] trackingArray) {
+        if (currentCharacter == '.') {
+            return true;
+        }
+        int currentNumber = currentCharacter - '0';
+        if (trackingArray[currentNumber - 1] == 1) {
+            return false;
+        } else {
+            trackingArray[currentNumber - 1] = 1;
+        }
+        return true;
+    }
+
+    public static int maxDepth(TreeNode root) {
+        if(root == null) return 0;
+        int leftHeight = maxDepth(root.left);
+        int rightHeight = maxDepth(root.right);
+        return 1 + Math.max(leftHeight, rightHeight);
+    }
+
+    /**
+     * time complexity - o(n)
+     */
+    public static boolean isSameTree(TreeNode p, TreeNode q) {
+        if(p == null && q == null) return true;
+        if(p == null || q == null) return false;
+        if(p.val != q.val) return false;
+        return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+    }
+
+    /**
+     * time complexity - o(n)
+     */
+    public static TreeNode invertTree(TreeNode root) {
+        if(root == null) return root;
+        Deque<TreeNode> queue = new ArrayDeque<>();
+        queue.add(root);
+        TreeNode currentNode;
+        while(!queue.isEmpty()) {
+            currentNode = queue.poll();
+            if(currentNode.left != null) queue.add(currentNode.left);
+            if(currentNode.right != null) queue.add(currentNode.right);
+            TreeNode temp = currentNode.left;
+            currentNode.left = currentNode.right;
+            currentNode.right = temp;;
+        }
+        return root;
+    }
+
+    public static boolean isSymmetric(TreeNode root) {
+        ArrayList<TreeNode> firstList = new ArrayList<>();
+        ArrayList<TreeNode> secondList = new ArrayList<>();
+        firstList.add(root);
+        TreeNode currentNode;
+        ArrayList<Integer> tempList = new ArrayList<>();
+        while (!(firstList.isEmpty() && secondList.isEmpty())) {
+
+            if(!firstList.isEmpty()) {
+                Iterator<TreeNode> it = firstList.iterator();
+                while (it.hasNext()) {
+                    currentNode = it.next();
+                    if(currentNode != null) {
+                        tempList.add(currentNode.val);
+                        secondList.add(currentNode.left);
+                        secondList.add(currentNode.right);
+                    } else {
+                        tempList.add(-1);
+                    }
+                }
+                firstList = new ArrayList<>();
+            } else if(!secondList.isEmpty()) {
+                Iterator<TreeNode> it = secondList.iterator();
+                while (it.hasNext()) {
+                    currentNode = it.next();
+                    if(currentNode != null) {
+                        tempList.add(currentNode.val);
+                        firstList.add(currentNode.left);
+                        firstList.add(currentNode.right);
+                    } else {
+                        tempList.add(-1);
+                    }
+                }
+                secondList = new ArrayList<>();
+            }
+
+            int leftPtr = 0, rightPtr = tempList.size()-1;
+            while (leftPtr < rightPtr) {
+                if(tempList.get(leftPtr) != tempList.get(rightPtr)) return false;
+                ++leftPtr;
+                --rightPtr;
+            }
+            tempList = new ArrayList<>();
+
+        }
+        return true;
+    }
+
+    public static int longestSequence(Integer[] numbers) {
+        Set<Integer> numberSet = new HashSet<>(List.of(numbers));
+        int maxSoFar = 0;
+        for(int i=0; i<numbers.length; i++) {
+            int currentLength = 0;
+            int currentNumber = numbers[i];
+            while (numberSet.contains(currentNumber)) {
+                numberSet.remove(currentNumber);
+                ++currentNumber;
+                ++currentLength;
+            }
+            maxSoFar = Math.max(maxSoFar, currentLength);
+        }
+        return  maxSoFar;
+    }
+
+    static Map<Integer, Integer> numbers = new HashMap<>();
+    static int postorderIndex = -1;
+    static int[] inorderArray = new int[]{};
+    static int[] postorderArray = new int[]{};
+
+    public static TreeNode buildTree(int[] postorder, int[] inorder) {
+        for(int i=0; i<inorder.length; i++) numbers.put(inorder[i], i);
+        inorderArray = inorder;
+        postorderArray = postorder;
+        postorderIndex = postorder.length;
+        return buildTree(0, inorder.length);
+    }
+
+    public static TreeNode buildTree(int startIndex, int endIndex) {
+
+        if(endIndex - startIndex <= 0) return null;
+
+        int rootNodeIndex = numbers.get(postorderArray[--postorderIndex]);
+
+        TreeNode currentNode = new TreeNode(inorderArray[rootNodeIndex]);
+        currentNode.right = buildTree(rootNodeIndex+1, endIndex);
+        currentNode.left = buildTree(startIndex, rootNodeIndex);
+        return  currentNode;
+    }
+
+    public static TreeNode connect(TreeNode root) {
+        if(root == null) return root;
+        Queue<TreeNode> queue1 = new ArrayDeque<>();
+        queue1.add(root);
+        Queue<TreeNode> queue2 = new ArrayDeque<>();
+        while(!queue1.isEmpty() || !queue2.isEmpty()) {
+            TreeNode previousNode = null;
+            TreeNode currentNode;
+            if(!queue1.isEmpty()) {
+                while (!queue1.isEmpty()) {
+                    currentNode = queue1.poll();
+                    if(previousNode != null) {
+                        previousNode.next = currentNode;
+                    }
+                    previousNode = currentNode;
+                    if(currentNode.left != null) queue2.add(currentNode.left);
+                    if(currentNode.right != null) queue2.add(currentNode.right);
+                }
+            } else {
+                while (!queue2.isEmpty()) {
+                    currentNode = queue2.poll();
+                    if(previousNode != null) {
+                        previousNode.next = currentNode;
+                    }
+                    previousNode = currentNode;
+                    if(currentNode.left != null) queue1.add(currentNode.left);
+                    if(currentNode.right != null) queue1.add(currentNode.right);
+                }
+            }
+        }
+        return root;
+    }
+
+    public static void flatten(TreeNode root) {
+        flattenNode(root);
+    }
+
+    public static void flattenNode(TreeNode root) {
+        if(root.left == null && root.right == null) return;
+        if(root.left != null) flattenNode(root.left);
+        if(root.right != null) flattenNode(root.right);
+        if(root.left != null) {
+            TreeNode rightPtr = root.right;
+            TreeNode rightEndOfLeftBranch = root.left;
+            while(rightEndOfLeftBranch.right != null) {
+                rightEndOfLeftBranch = rightEndOfLeftBranch.right;
+            }
+            root.right = root.left;
+            root.left = null;
+            rightEndOfLeftBranch.right = rightPtr;
+        }
+    }
+
+    // 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
+
+    /**
+     *
+     *      1
+     *   2    3
+     * 4  5  6  7
+     *
+     */
+    public static boolean hasPathSum(TreeNode root, int targetSum) {
+        return hasPathSum(root, 0, targetSum);
+    }
+
+    public static boolean hasPathSum(TreeNode currentNode, Integer currentSum, Integer targetSum) {
+        currentSum += currentNode.val;
+        if(currentNode.right == null && currentNode.left == null && currentSum == targetSum) return true;
+        if(currentNode.left != null) if(hasPathSum(currentNode.left, currentSum, targetSum)) return true;
+        if(currentNode.right != null) if(hasPathSum(currentNode.right, currentSum, targetSum)) return true;
+        return false;
+    }
+
+    public static int sumNumbers(TreeNode root) {
+        List<Integer> numbers = new ArrayList<>();
+        sumNumbers(root, 0, numbers);
+        int result = 0;
+        for(int i=0; i<numbers.size(); i++) {
+            result+=numbers.get(i);
+        }
+        return result;
+    }
+
+    public static void sumNumbers(TreeNode currentNode, int numberSoFar, List<Integer> numbers) {
+        numberSoFar = numberSoFar*10 + currentNode.val;
+        if(currentNode.right == null && currentNode.left == null) {
+            numbers.add(numberSoFar);
+        }
+        if(currentNode.left != null) sumNumbers(currentNode.left, numberSoFar, numbers);
+        if(currentNode.right != null) sumNumbers(currentNode.right, numberSoFar, numbers);
+    }
 
 
 }

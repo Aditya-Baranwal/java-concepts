@@ -1,10 +1,10 @@
-package com.java.threading.odd_even_printer;
+package com.java.threading.odd_even_printer_using_synchronized;
 
-public class EvenPrinter extends Thread {
+public class OddPrinter extends Thread {
 
     private Counter counter;
 
-    public EvenPrinter(Counter ctr) {
+    public OddPrinter(Counter ctr) {
         super();
         counter = ctr;
     }
@@ -12,23 +12,23 @@ public class EvenPrinter extends Thread {
     @Override
     public void run() {
         try {
-            synchronized (counter) {
-                while (true) {
+            synchronized(counter) {
+                while(true) {
 
                     if(counter.getCounter() == counter.getMAX_VALUE()) {
                         counter.notify();
                         break;
                     }
 
-                    System.out.format("even counter checking\n");
-                    if (counter.getCounter() % 2 == 1) {
+                    System.out.format("odd counter checking\n");
+                    if (counter.getCounter() % 2 == 0) {
                         counter.setCounter(counter.getCounter()+1);
-                        System.out.format("even counter - %d\n", counter.getCounter());
+                        System.out.format("odd counter - %d\n", counter.getCounter());
                         counter.notify();
                     } else {
-                        System.out.format("even counter waiting\n");
+                        System.out.format("odd counter waiting\n");
                         counter.wait();
-                        System.out.format("even counter wait is over\n");
+                        System.out.format("odd counter wait is over\n");
                     }
                 }
             }
@@ -36,6 +36,5 @@ public class EvenPrinter extends Thread {
             e.printStackTrace();
         }
     }
-
 
 }

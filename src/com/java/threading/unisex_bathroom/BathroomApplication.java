@@ -1,6 +1,5 @@
 package com.java.threading.unisex_bathroom;
 
-import com.java.threading.unisex_bathroom.Bathroom;
 import com.java.threading.unisex_bathroom.clients.ManAdderClient;
 import com.java.threading.unisex_bathroom.clients.WomanAdderClient;
 import java.util.concurrent.Executor;

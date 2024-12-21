@@ -1,4 +1,4 @@
-package com.java.threading.odd_even_printer;
+package com.java.threading.odd_even_printer_using_synchronized;
 
 class Counter {
 
