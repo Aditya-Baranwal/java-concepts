@@ -18,7 +18,8 @@ public class Main {
          * re-entrant lock is custom lock from java.util.concurrent.locks package,
          * it helps us to overcome issues faced by monitor_lock (synchronized lock)
          * 1. provides control on acquiring and releasing a lock
-         * 2. providesnt tryLock() method, which helps thread from getting into wait state for entire life
+         * 2. provides tryLock() method, which helps thread from getting into wait state for entire life
+         * 3. lock is not on shared resource object, but lock object is used for synchronization
         */
         ReentrantLock lock = new ReentrantLock();
 
